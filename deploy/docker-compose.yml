@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: my-app-db
+    restart: unless-stopped
+    # 推荐使用 .env 文件来管理敏感信息
+    # 您可以在此目录下创建一个 .env 文件，并定义以下变量
+    environment:
+      MYSQL_ROOT_PASSWORD: your_strong_password
+      MYSQL_DATABASE: ai_platform
+      MYSQL_USER: ai_user
+      MYSQL_PASSWORD: ai_pass
+    ports:
+      # 将容器的 3306 端口映射到主机的 3306 端口
+      - "3306:3306"
+    volumes:
+      # 挂载初始化脚本
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # 持久化数据库数据
+      - db_data:/var/lib/mysql
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+
+volumes:
+  db_data:
+    driver: local
